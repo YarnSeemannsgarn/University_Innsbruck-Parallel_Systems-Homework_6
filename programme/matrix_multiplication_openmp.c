@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <omp.h>
 
 #include "util.h"
 
@@ -12,6 +13,7 @@ int *matrix_multiplication(int *matrix1, size_t rows1, size_t columns1, int *mat
   int i, j, k;
   for(i=0; i<rows1; ++i){
     for(j=0; j<columns2; ++j){
+      #pragma omp parallel for reduction(+: sum)
       for(k=0; k<rows2; ++k){
 	sum = sum + matrix1[i*columns1+k] * matrix2[k*columns2+j];
       }
@@ -34,10 +36,9 @@ int main(int argc, char *argv[]){
   int *matrix1;
   int *matrix2;
   int *result_matrix;
-  clock_t begin, end;
-  double time_spent;
+  double begin, end;
 
-  matrix2 = create_matrix(N, N);   // Everybody needs the second matrix
+  matrix2 = create_matrix(N, N);
   matrix1 = create_matrix(N, N);
   result_matrix = create_matrix(N, N);
 
@@ -56,27 +57,14 @@ int main(int argc, char *argv[]){
       print_matrix(matrix2, N, N);
   }
 
-  // Measure time at root
-  begin = clock();
+  // Measure time 
+  begin = omp_get_wtime();
   
-  /* MPI
-  // Scatter matrix1 and broadcast matrix2
-  int *scatter_receive = malloc(send_count * sizeof(int));
-  MPI_Scatter(matrix1, send_count, MPI_INT, scatter_receive, send_count, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(matrix2, N*N, MPI_INT, 0, MPI_COMM_WORLD);
-
-  // Mutlitply the matrix partitions (consider your rank)
-  int rows_per_process = send_count / N;
-  int *result_part = matrix_multiplication(scatter_receive, rows_per_process, N, matrix2, N, N);
-
-  // Gather results
-  MPI_Gather(result_part, send_count, MPI_INT, result_matrix, send_count, MPI_INT, 0, MPI_COMM_WORLD);
-  */
+  result_matrix = matrix_multiplication(matrix1, N, N, matrix2, N, N);
 
   // Print result And give time
-  end = clock();
-  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  printf("Time spent: %fs\n", time_spent);
+  end = omp_get_wtime();
+  printf("Time spent: %fs\n", end-begin);
   if(argc == 3) {
     printf("\nResult matrix:\n");
     print_matrix(result_matrix, N, N);
