@@ -5,7 +5,6 @@
 #include "util.h"
 
 typedef struct node {
-  int title;
   int visited;
   int total_distance;
   int via;
@@ -197,7 +196,6 @@ int main(int argc, char *argv[]) {
   node_t *nodes = malloc(sizeof(node_t) * N);
   int i, j;
   for (i = 0; i < N; i++) {
-    nodes[i].title = i;
     nodes[i].visited = 0;
   }
 
@@ -219,6 +217,7 @@ int main(int argc, char *argv[]) {
   // Print edges for nodes
   if (argc == 3) {
     printf("Edges\n");
+    printf("=====\n");
     for (i = 0; i < edge_count; i++) {
       printf("Node %i <--> Node %i: %i\n", edges[i].node1, edges[i].node2, edges[i].distance);
     }
@@ -230,6 +229,7 @@ int main(int argc, char *argv[]) {
   // Print solution
   if (argc == 3) {
     printf("Dijkstra for Node 0\n");
+    printf("===================\n");
     for (i = 0; i < N; i++) {
       printf("Minimal distance from Node 0 to Node %i: %i, via: %i\n", i, nodes[i].total_distance, nodes[i].via);
     }
