@@ -1,0 +1,4 @@
+*.o
+matrix_multiplication_openmp
+sieve_of_erastosthenes_openmp
+dijkstra_openmp
