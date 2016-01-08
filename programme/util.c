@@ -4,7 +4,6 @@
 
 #include "util.h"
 
-// Cannot use two-dimensional array, because MPI_Scatter expects flat array
 int *create_matrix (size_t M, size_t N) {
     int *matrix;
     int h;

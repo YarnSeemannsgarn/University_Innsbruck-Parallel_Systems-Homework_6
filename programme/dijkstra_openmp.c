@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <omp.h>
 
 #include "util.h"
 
@@ -128,6 +129,7 @@ void dijsktra(node_t *nodes, size_t node_count, edge_t *edges, int edge_count, i
   // then change it to 8. Otherwise, keep the current value.
   // --------------------------------------------------------------------------------
   while (1) {
+    #pragma omp parallel for shared(nodes)
     for (i = 0; i < edge_count; i++) {
       int neighbour_node = -1;
       if (edges[i].node1 == current) {
@@ -193,7 +195,11 @@ int main(int argc, char *argv[]) {
   size_t N = atoi(argv[1]);
 
   // Create N nodes
-  node_t *nodes = malloc(sizeof(node_t) * N);
+  node_t *nodes;
+  if ((nodes = malloc(sizeof(node_t) * N)) == NULL) {
+      printf("Malloc error");
+      exit(1);
+  }
   int i, j;
   for (i = 0; i < N; i++) {
     nodes[i].visited = 0;
@@ -224,10 +230,16 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
+  // Dijkstra + measuring time
+  double begin_time, end_time;
+  begin_time = omp_get_wtime();
   dijsktra(nodes, N, edges, edge_count, 0);
+  end_time = omp_get_wtime();
+  printf("Time spent: %fs\n", end_time-begin_time);
 
   // Print solution
   if (argc == 3) {
+    printf("\n");
     printf("Dijkstra for Node 0\n");
     printf("===================\n");
     for (i = 0; i < N; i++) {
