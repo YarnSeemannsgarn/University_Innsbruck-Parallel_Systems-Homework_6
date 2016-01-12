@@ -31,21 +31,10 @@ int main(int argc, char *argv[]){
   double begin_time, end_time;
   begin_time = omp_get_wtime();
   
-  // Sieve from 1 to sqrt(N)
+  // Sieve
   for (i = 2; i < square_root; ++i) {
-    if (primes[i] == 1) {
-      for(j = i * i; j <= square_root; j = j + i){
-	primes[j] = 0;
-      }
-    }
-  }
-
-  // Sieve from sqrt(N) to N in parallel
-  #pragma omp parallel for private(j)
-  for (i = 2; i <= square_root; i++) {
-    int rest = (square_root+1) % i;
-    int start = (square_root+1) + (i-rest);
-    for (j = start; j < N; j = j + i) {
+    #pragma omp parallel for shared(primes)
+    for(j = i * i; j <= N; j = j + i) {
       primes[j] = 0;
     }
   }
